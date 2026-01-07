@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Hawkins Protocol | Resume Scanner</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@300;700&display=swap');
+
+        :root {
+            --stranger-red: #ff0000;
+            --deep-red: #8b0000;
+            --clinical-white: #f4f1ea;
+            --void-black: #050505;
+            --text-dark: #222;
+            --glow: 0 0 10px rgba(255, 0, 0, 0.4), 0 0 20px rgba(255, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            cursor: crosshair;
+        }
+
+        body {
+            background-color: var(--clinical-white);
+            color: var(--text-dark);
+            font-family: 'Courier Prime', monospace;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(255, 0, 0, 0.05) 0%, transparent 80%),
+                repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.02) 1px, rgba(0,0,0,0.02) 2px);
+            padding-bottom: 50px;
+        }
+
+        .vecna-bg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            height: 80vh;
+            background-image: url('https://images.squarespace-cdn.com/content/v1/51b3dc8ee4b051b96ceb10de/1655138138760-705A0R8WJ7A1M8KCPY6G/Vecna.png');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            filter: brightness(0.8) contrast(1.5) opacity(0.06) grayscale(1);
+            z-index: 1;
+            pointer-events: none;
+            animation: float 10s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(-50%, -48%) scale(1); }
+            50% { transform: translate(-50%, -52%) scale(1.05); }
+        }
+
+        body::after {
+            content: " ";
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.02) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.01));
+            z-index: 10;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 900px;
+            background: rgba(244, 241, 234, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--deep-red);
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), inset 0 0 20px rgba(139, 0, 0, 0.05);
+            position: relative;
+            z-index: 5;
+            margin: 40px 0;
+        }
+
+        .pre-header {
+            text-align: center;
+            color: var(--stranger-red);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: -10px;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.2);
+            font-weight: 700;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--stranger-red);
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5rem;
+            color: var(--stranger-red);
+            text-transform: uppercase;
+            margin: 0;
+            letter-spacing: 12px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .bubble-text span {
+            display: inline-block;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .bubble-text span:hover {
+            transform: scale(1.3) translateY(-15px);
+            color: #ff4444;
+            text-shadow: 0 10px 10px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            letter-spacing: 6px;
+            color: var(--void-black);
+            margin-top: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .instructions-panel {
+            margin: 30px auto;
+            border: 1px dashed var(--stranger-red);
+            padding: 20px;
+            background: rgba(255, 0, 0, 0.02);
+            text-align: left;
+            max-width: 80%;
+        }
+
+        .instructions-title {
+            color: var(--stranger-red);
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid var(--stranger-red);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .instructions-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .instructions-list li {
+            color: var(--deep-red);
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .instructions-list li::before {
+            content: "►";
+            position: absolute;
+            left: 0;
+            color: var(--stranger-red);
+            font-size: 0.7rem;
+            top: 2px;
+        }
+
+        .upload-box {
+            border: 2px dashed var(--deep-red);
+            padding: 50px 20px;
+            text-align: center;
+            transition: all 0.4s ease;
+            margin-bottom: 30px;
+            background: rgba(255, 0, 0, 0.01);
+            color: var(--text-dark);
+        }
+
+        .upload-box:hover, .upload-box.dragging {
+            border-color: var(--stranger-red);
+            background: rgba(255, 0, 0, 0.04);
+            box-shadow: inset 0 0 15px rgba(255, 0, 0, 0.05);
+        }
+
+        .btn-primary {
+            background: transparent;
+            color: var(--stranger-red);
+            border: 1px solid var(--stranger-red);
+            padding: 12px 30px;
+            font-family: 'Courier Prime', monospace;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: block;
+            margin: 20px auto;
+        }
+
+        .btn-primary:hover {
+            background: var(--stranger-red);
+            color: white;
+            box-shadow: var(--glow);
+        }
+
+        .sample-preview {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        .sample-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #888;
+            margin-bottom: 15px;
+            display: block;
+            text-align: center;
+        }
+
+        .sample-grid {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .sample-card {
+            width: 120px;
+            height: 180px; 
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            opacity: 0.8;
+            transition: 0.3s;
+        }
+
+        .sample-card:hover {
+            opacity: 1;
+            transform: translateY(-5px);
+            border-color: var(--stranger-red);
+        }
+
+        .sample-img-mock {
+            width: 100%;
+            height: 90px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 5px;
+        }
+        
+        .resume-vis-header {
+            width: 100%;
+            height: 12px;
+            background: #333;
+            margin-bottom: 4px;
+            border-radius: 1px;
+        }
+        
+        .resume-vis-body {
+            display: flex;
+            height: 100%;
+            gap: 4px;
+        }
+        
+        .resume-vis-sidebar {
+            width: 25%;
+            height: 80%;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 2px;
+        }
+        
+        .resume-vis-photo {
+            width: 15px;
+            height: 15px;
+            background: #bbb;
+            border-radius: 50%;
+            margin-bottom: 4px;
+        }
+        
+        .resume-vis-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        
+        .resume-vis-line {
+            height: 2px;
+            background: #ddd;
+            width: 100%;
+        }
+        
+        .resume-vis-line.short { width: 50%; }
+        .resume-vis-line.thick { height: 3px; background: #ccc; margin-bottom: 2px; }
+
+        .mini-circle-container {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: auto; 
+        }
+
+        .mini-progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .mini-score-text {
+            position: absolute;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--stranger-red);
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        #processing {
+            display: none;
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .scanner-bar {
+            width: 100%;
+            height: 2px;
+            background: var(--stranger-red);
+            box-shadow: var(--glow);
+            position: relative;
+            animation: scan 2s infinite linear;
+        }
+
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            50% { opacity: 1; }
+            100% { top: 100px; opacity: 0; }
+        }
+
+        #results {
+            display: none;
+            animation: fadeIn 1s forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .score-main {
+            text-align: center;
+            border: none;
+            background: transparent; 
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .circle-container {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring__circle {
+            stroke: #eee;
+            stroke-width: 8;
+            fill: transparent;
+        }
+
+        .progress-ring__fill {
+            stroke: var(--stranger-red);
+            stroke-width: 8;
+            stroke-linecap: round;
+            fill: transparent;
+            stroke-dasharray: 440; 
+            stroke-dashoffset: 440;
+            transition: stroke-dashoffset 2s ease-out;
+            filter: drop-shadow(0 0 5px var(--stranger-red));
+        }
+
+        .score-value {
+            position: absolute;
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: var(--stranger-red);
+            font-family: 'Space Grotesk', sans-serif;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .score-label {
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--deep-red);
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .detail-item {
+            background: white;
+            border: 1px solid rgba(139, 0, 0, 0.2);
+            padding: 15px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.03);
+        }
+
+        .detail-item::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: var(--stranger-red);
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+            color: var(--void-black);
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--stranger-red);
+            width: 0%;
+            transition: width 1.5s cubic-bezier(0.1, 1, 0.1, 1);
+        }
+
+        .detail-desc {
+            font-size: 0.75rem;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        .status-stamp {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            border: 2px solid var(--stranger-red);
+            padding: 5px 10px;
+            color: var(--stranger-red);
+            font-weight: bold;
+            transform: rotate(15deg);
+            opacity: 0.2;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+
+        .flicker {
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.95; }
+            100% { opacity: 1; }
+        }
+
+        .scanning-section {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px dashed var(--deep-red);
+            text-align: center;
+        }
+
+        .scanning-label {
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--stranger-red);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .demo-resume-container {
+            position: relative;
+            width: 220px;
+            height: 280px;
+            background: white;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 20px;
+            text-align: left;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .resume-text-content h4 {
+            font-size: 12px;
+            margin: 0 0 2px 0;
+            color: #222;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #d32f2f;
+            padding-bottom: 2px;
+        }
+        
+        .resume-text-content h5 {
+            font-size: 8px;
+            margin: 5px 0 2px 0;
+            color: #555;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .resume-text-content p {
+            font-size: 6px;
+            color: #666;
+            margin: 0 0 4px 0;
+            line-height: 1.4;
+        }
+        
+        .resume-text-content li {
+            font-size: 6px;
+            color: #666;
+            margin-left: -20px;
+            line-height: 1.4;
+        }
+
+        .magnifier {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--stranger-red);
+            border-radius: 50%;
+            background: rgba(255, 0, 0, 0.05);
+            backdrop-filter: blur(1px) contrast(1.1); 
+            top: 20px;
+            left: 20px;
+            box-shadow: 0 0 15px rgba(255,0,0,0.2);
+            animation: searchMove 5s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        .magnifier::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            right: -15px;
+            width: 20px;
+            height: 4px;
+            background: var(--stranger-red);
+            transform: rotate(45deg);
+        }
+
+        @keyframes searchMove {
+            0% { top: 20px; left: 20px; transform: scale(1); }
+            25% { top: 60px; left: 120px; transform: scale(1.1); }
+            50% { top: 160px; left: 40px; transform: scale(1); }
+            75% { top: 120px; left: 100px; transform: scale(1.1); }
+            100% { top: 200px; left: 60px; transform: scale(1); }
+        }
+
+        /* Bottom Instructions Styles */
+        .bottom-instructions {
+            margin-top: 40px;
+            border-top: 2px solid var(--deep-red);
+            padding-top: 30px;
+            text-align: left;
+        }
+
+        .bottom-instructions h3 {
+            color: var(--stranger-red);
+            font-family: 'Space Grotesk', sans-serif;
+            text-align: center;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+            font-size: 1rem;
+        }
+
+        .points-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .point-card {
+            background: rgba(255, 0, 0, 0.03);
+            border-left: 3px solid var(--stranger-red);
+            padding: 15px;
+        }
+
+        .point-card strong {
+            display: block;
+            color: var(--stranger-red);
+            font-family: 'Space Grotesk', sans-serif;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .point-card p {
+            font-size: 0.8rem;
+            margin: 0;
+            color: #444;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .score-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 2.2rem; letter-spacing: 6px; }
+            .pre-header { font-size: 1rem; }
+            .points-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="vecna-bg"></div>
+
+    <div class="container">
+        <div class="pre-header">Is your resume good enough?</div>
+        <div class="header">
+            <h1 class="flicker bubble-text">
+                <span>H</span><span>a</span><span>w</span><span>k</span><span>i</span><span>n</span><span>s</span>
+            </h1>
+            <p>Resume Analytics</p>
+        </div>
+
+        <div id="upload-stage">
+            <div class="upload-box" id="drop-zone">
+                <p id="file-label">DEPOSIT SUBJECT DOSSIER (PDF/DOCX)</p>
+                <input type="file" id="file-input" hidden accept=".pdf,.docx,.txt">
+                <button class="btn-primary" onclick="document.getElementById('file-input').click()">UPLOAD YOUR RESUME</button>
+            </div>
+            
+            <div class="instructions-panel">
+                <span class="instructions-title">PROTOCOL INSTRUCTIONS</span>
+                <ul class="instructions-list">
+                    <li>ENSURE FORMAT IS ATS-COMPATIBLE (PDF PREFERRED).</li>
+                    <li>INTEGRATE MISSION-CRITICAL KEYWORDS.</li>
+                    <li>QUANTIFY OPERATIONAL ACHIEVEMENTS.</li>
+                    <li>MAINTAIN CHRONOLOGICAL CONTINUITY.</li>
+                    <li>ELIMINATE REDUNDANT DATA POINTS.</li>
+                </ul>
+            </div>
+
+            <div class="sample-preview">
+                <span class="sample-label">Reference Results Data</span>
+                <div class="sample-grid">
+                    <!-- Sample 1 -->
+                    <div class="sample-card">
+                        <div class="sample-img-mock">
+                            <div class="resume-vis-header"></div>
+                            <div class="resume-vis-body">
+                                <div class="resume-vis-sidebar"><div class="resume-vis-photo"></div></div>
+                                <div class="resume-vis-content">
+                                    <div class="resume-vis-line thick"></div>
+                                    <div class="resume-vis-line"></div>
+                                    <div class="resume-vis-line"></div>
+                                    <div class="resume-vis-line short"></div>
+                                    <div class="resume-vis-line"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mini-circle-container">
+                            <svg class="mini-progress-ring" width="60" height="60">
+                                <circle stroke="#eee" stroke-width="4" fill="transparent" r="25" cx="30" cy="30" />
+                                <circle stroke="#ff0000" stroke-width="4" fill="transparent" r="25" cx="30" cy="30" 
+                                        stroke-dasharray="157" stroke-dashoffset="19" stroke-linecap="round" />
+                            </svg>
+                            <span class="mini-score-text">88%</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Sample 2 -->
+                    <div class="sample-card">
+                        <div class="sample-img-mock">
+                            <div class="resume-vis-header" style="background:#555"></div>
+                            <div class="resume-vis-body">
+                                <div class="resume-vis-sidebar" style="background:#e5e5e5"><div class="resume-vis-photo"></div></div>
+                                <div class="resume-vis-content">
+                                    <div class="resume-vis-line thick"></div>
+                                    <div class="resume-vis-line"></div>
+                                    <div class="resume-vis-line short"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mini-circle-container">
+                            <svg class="mini-progress-ring" width="60" height="60">
+                                <circle stroke="#eee" stroke-width="4" fill="transparent" r="25" cx="30" cy="30" />
+                                <circle stroke="#ff0000" stroke-width="4" fill="transparent" r="25" cx="30" cy="30" 
+                                        stroke-dasharray="157" stroke-dashoffset="91" stroke-linecap="round" />
+                            </svg>
+                            <span class="mini-score-text">42%</span>
+                        </div>
+                    </div>
+
+                    <!-- Sample 3 -->
+                    <div class="sample-card">
+                        <div class="sample-img-mock">
+                            <div class="resume-vis-header"></div>
+                            <div class="resume-vis-body">
+                                <div class="resume-vis-sidebar"><div class="resume-vis-photo"></div></div>
+                                <div class="resume-vis-content">
+                                    <div class="resume-vis-line thick"></div>
+                                    <div class="resume-vis-line"></div>
+                                    <div class="resume-vis-line"></div>
+                                    <div class="resume-vis-line"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mini-circle-container">
+                            <svg class="mini-progress-ring" width="60" height="60">
+                                <circle stroke="#eee" stroke-width="4" fill="transparent" r="25" cx="30" cy="30" />
+                                <circle stroke="#ff0000" stroke-width="4" fill="transparent" r="25" cx="30" cy="30" 
+                                        stroke-dasharray="157" stroke-dashoffset="45" stroke-linecap="round" />
+                            </svg>
+                            <span class="mini-score-text">71%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scanning-section">
+                <span class="scanning-label">Live Analysis Feed</span>
+                <div class="demo-resume-container">
+                    <div class="resume-text-content">
+                        <h4>WILL BYERS</h4>
+                        <p><strong>HAWKINS, IN</strong> | SURVIVOR</p>
+                        
+                        <h5>OBJECTIVE</h5>
+                        <p>To avoid the Upside Down and play D&D.</p>
+                        
+                        <h5>EXPERIENCE</h5>
+                        <p><strong>Chief Surveyor</strong> - Castle Byers (1983-Present)</p>
+                        <ul>
+                            <li>Navigated alternate dimensions.</li>
+                            <li>Communicated via Christmas lights.</li>
+                        </ul>
+                        
+                        <h5>SKILLS</h5>
+                        <p>Stealth, Drawing, True Sight, Resilience.</p>
+
+                        <h5>EDUCATION</h5>
+                        <p>Hawkins Middle School - 3.8 GPA</p>
+                    </div>
+                    
+                    <div class="magnifier"></div>
+                </div>
+            </div>
+
+            <!-- New Bottom Instructions Section -->
+            <div class="bottom-instructions">
+                <h3>// MISSION CRITICAL: RESUME KEY POINTS //</h3>
+                <div class="points-grid">
+                    <div class="point-card">
+                        <strong>01. TARGETING</strong>
+                        <p>Tailor content to the specific role. Generic dossiers are easily intercepted and discarded.</p>
+                    </div>
+                    <div class="point-card">
+                        <strong>02. CLARITY</strong>
+                        <p>Use bullet points and clear headings. Dense blocks of text confuse the scanning algorithms.</p>
+                    </div>
+                    <div class="point-card">
+                        <strong>03. IMPACT</strong>
+                        <p>Start bullets with strong action verbs (e.g., "Led," "Developed," "Saved"). Passive voice is weak.</p>
+                    </div>
+                    <div class="point-card">
+                        <strong>04. METRICS</strong>
+                        <p>Prove your worth with numbers. "Increased sales by 20%" overrides "Increased sales."</p>
+                    </div>
+                </div>
+            </div>
+
+            <button id="scan-btn" class="btn-primary" style="display: none; width: 100%; margin-top: 40px;" onclick="runDiagnostic()">Run Diagnostic</button>
+        </div>
+
+        <div id="processing">
+            <div class="scanner-bar"></div>
+            <p style="margin-top: 20px; color: var(--stranger-red); letter-spacing: 5px; font-weight: bold;" id="status-text">DECRYPTING ENTIITIES...</p>
+        </div>
+
+        <div id="results">
+            <div class="score-grid">
+                <div class="score-main">
+                    <div class="circle-container">
+                        <svg class="progress-ring" width="160" height="160">
+                            <!-- Background track of the circle (100% border) -->
+                            <circle class="progress-ring__circle" stroke-width="8" fill="transparent" r="70" cx="80" cy="80" />
+                            <!-- Fill circle (Value) -->
+                            <circle id="circle-fill" class="progress-ring__fill" stroke-width="8" fill="transparent" r="70" cx="80" cy="80" />
+                        </svg>
+                        <div class="score-value" id="main-score">0</div>
+                    </div>
+                    <span class="score-label">Compatibility Level</span>
+                    <span class="score-label" id="verdict" style="margin-top: 10px;">Classified</span>
+                </div>
+
+                <div class="details-list">
+                    <div class="detail-item">
+                        <div class="detail-header">
+                            <span>Psychic Signature (Keywords)</span>
+                            <span id="score1-val">0%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-fill" id="pb1"></div>
+                        </div>
+                        <div class="detail-desc">
+                            Matches identified between subject skills and target operational requirements.
+                        </div>
+                        <div class="status-stamp">Confidential</div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-header">
+                            <span>Field Experience (Work History)</span>
+                            <span id="score2-val">0%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-fill" id="pb2"></div>
+                        </div>
+                        <div class="detail-desc">
+                            Depth of chronological data points and relevance of past missions.
+                        </div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-header">
+                            <span>Transmission Clarity (Format)</span>
+                            <span id="score3-val">0%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-fill" id="pb3"></div>
+                        </div>
+                        <div class="detail-desc">
+                            Ability for automated systems (ATS) to parse dossier without interference.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn-primary" style="margin-top: 40px;" onclick="location.reload()">Reset Protocol</button>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const dropZone = document.getElementById('drop-zone');
+        const scanBtn = document.getElementById('scan-btn');
+        const fileLabel = document.getElementById('file-label');
+        const processing = document.getElementById('processing');
+        const results = document.getElementById('results');
+        const statusText = document.getElementById('status-text');
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileLabel.innerHTML = `SUBJECT IDENTIFIED: <span style="color:#ff0000; font-weight:bold;">${file.name.toUpperCase()}</span>`;
+                scanBtn.style.display = 'block';
+                dropZone.style.borderColor = 'var(--stranger-red)';
+            }
+        }
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragging');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragging');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragging');
+            fileInput.files = e.dataTransfer.files;
+            handleFileSelect({ target: fileInput });
+        });
+
+        function setCircleProgress(percent) {
+            const circle = document.getElementById('circle-fill');
+            const radius = circle.r.baseVal.value;
+            const circumference = radius * 2 * Math.PI;
+            const offset = circumference - (percent / 100 * circumference);
+            circle.style.strokeDashoffset = offset;
+        }
+
+        function runDiagnostic() {
+            document.getElementById('upload-stage').style.display = 'none';
+            processing.style.display = 'block';
+
+            const messages = [
+                "ESTABLISHING SECURE UPLINK...",
+                "BYPASSING FIREWALLS...",
+                "EXTRACTING BIO-DATA...",
+                "ANALYZING PSYCHIC RESIDUE...",
+                "FINALIZING DOSSIER..."
+            ];
+
+            let i = 0;
+            const interval = setInterval(() => {
+                statusText.innerText = messages[i];
+                i++;
+                if (i >= messages.length) {
+                    clearInterval(interval);
+                    setTimeout(showResults, 1000);
+                }
+            }, 800);
+        }
+
+        function showResults() {
+            processing.style.display = 'none';
+            results.style.display = 'block';
+
+            const scores = {
+                total: Math.floor(Math.random() * 30) + 65,
+                keywords: Math.floor(Math.random() * 25) + 70,
+                history: Math.floor(Math.random() * 40) + 50,
+                format: Math.floor(Math.random() * 20) + 80
+            };
+
+            animateValue("main-score", 0, scores.total, 2000);
+            animateValue("score1-val", 0, scores.keywords, 2000, "%");
+            animateValue("score2-val", 0, scores.history, 2000, "%");
+            animateValue("score3-val", 0, scores.format, 2000, "%");
+
+            setTimeout(() => {
+                setCircleProgress(scores.total);
+                document.getElementById('pb1').style.width = scores.keywords + "%";
+                document.getElementById('pb2').style.width = scores.history + "%";
+                document.getElementById('pb3').style.width = scores.format + "%";
+                
+                const verdict = scores.total > 85 ? "ELITE" : scores.total > 70 ? "STABLE" : "COMPROMISED";
+                document.getElementById('verdict').innerText = verdict;
+            }, 100);
+        }
+
+        function animateValue(id, start, end, duration, suffix = "") {
+            const obj = document.getElementById(id);
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start) + suffix;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+    </script>
+</body>
+</html>
